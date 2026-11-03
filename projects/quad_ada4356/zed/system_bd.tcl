@@ -11,7 +11,8 @@ source $ad_hdl_dir/projects/common/zed/zed_system_bd.tcl
 # out at 800 MB/s against a 4 ch x 125 MSPS x 2 B = 1000 MB/s demand, so samples
 # are silently dropped mid-buffer.
 #
-# FCLK_CLK1 (200 MHz) and then FCLK_CLK2 at 166.67 MHz both fixed the bandwidth
+# The base design's default DMA clock (FCLK_CLK1, 200 MHz) and then FCLK_CLK2 at
+# 166.67 MHz both fixed the bandwidth
 # but failed timing: the DMA-to-crossbar AW arbiter path needs a fixed 6.166 ns
 # on this -1 part with four masters gathering into one arbiter, so slack is
 # (period - 6.166) and only a period >= 7 ns clears it with real margin.
@@ -24,20 +25,20 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_EN_CLK2_PORT 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_RST2_PORT 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA2_PERIPHERAL_FREQMHZ 142.8
 
-ad_ip_instance proc_sys_reset sys_166m_rstgen
-ad_ip_parameter sys_166m_rstgen CONFIG.C_EXT_RST_WIDTH 1
+ad_ip_instance proc_sys_reset sys_143m_rstgen
+ad_ip_parameter sys_143m_rstgen CONFIG.C_EXT_RST_WIDTH 1
 
-ad_connect sys_166m_clk    sys_ps7/FCLK_CLK2
-ad_connect sys_166m_reset  sys_166m_rstgen/peripheral_reset
-ad_connect sys_166m_resetn sys_166m_rstgen/peripheral_aresetn
-ad_connect sys_166m_clk    sys_166m_rstgen/slowest_sync_clk
-ad_connect sys_166m_rstgen/ext_reset_in sys_ps7/FCLK_RESET2_N
+ad_connect sys_143m_clk    sys_ps7/FCLK_CLK2
+ad_connect sys_143m_reset  sys_143m_rstgen/peripheral_reset
+ad_connect sys_143m_resetn sys_143m_rstgen/peripheral_aresetn
+ad_connect sys_143m_clk    sys_143m_rstgen/slowest_sync_clk
+ad_connect sys_143m_rstgen/ext_reset_in sys_ps7/FCLK_RESET2_N
 
 # Re-point only the DMA clock. sys_iodelay_clk stays on sys_200m_clk because
 # IDELAYCTRL requires exactly 200 MHz.
-set sys_dma_clk    [get_bd_nets sys_166m_clk]
-set sys_dma_reset  [get_bd_nets sys_166m_reset]
-set sys_dma_resetn [get_bd_nets sys_166m_resetn]
+set sys_dma_clk    [get_bd_nets sys_143m_clk]
+set sys_dma_reset  [get_bd_nets sys_143m_reset]
+set sys_dma_resetn [get_bd_nets sys_143m_resetn]
 
 source ../common/quad_ada4356_fmc_bd.tcl
 source $ad_hdl_dir/projects/scripts/adi_pd.tcl
@@ -49,7 +50,10 @@ ad_ip_parameter axi_sysid_0 CONFIG.ROM_ADDR_BITS 9
 ad_ip_parameter rom_sys_0 CONFIG.PATH_TO_FILE "[pwd]/$mem_init_sys_path"
 ad_ip_parameter rom_sys_0 CONFIG.ROM_ADDR_BITS 9
 
-sysid_gen_sys_init_file ""
+# Record the build parameters, so 'dmesg | grep sysid' shows which variant is flashed
+set sys_cstring "TDD_SUPPORT=$TDD_SUPPORT"
+
+sysid_gen_sys_init_file $sys_cstring
 
 # The DMA -> HP1 AW arbiter path on the 7 ns DMA clock misses by a few ps on some builds
 set_property strategy Flow_RunPostRoutePhysOpt [get_runs impl_1]
