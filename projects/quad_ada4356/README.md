@@ -1,7 +1,7 @@
 # QUAD-ADA4356 HDL Project
 
 - System documentation: to be added
-- HDL project documentation: to be added
+- HDL project documentation: https://analogdevicesinc.github.io/hdl/projects/quad_ada4356/index.html
 - Evaluation board VADJ: 2.5V
 
 ## Supported parts

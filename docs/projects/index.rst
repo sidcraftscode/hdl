@@ -103,6 +103,7 @@ Contents
    PLUTO <pluto/index>
    PULSAR-ADC <pulsar_adc/index>
    PULSAR-LVDS-ADC <pulsar_lvds_adc/index>
+   QUAD-ADA4356 <quad_ada4356/index>
 
 Obsolete projects
 -------------------------------------------------------------------------------
