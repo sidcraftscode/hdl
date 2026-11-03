@@ -114,10 +114,6 @@ module axi_ada4355 #(
   wire        up_adc_pn_err_s;
   wire        up_adc_pn_oos_s;
   wire [ 2:0] enable_error_s;
-  wire [ 2:0] adc_shift_cnt_s;
-  wire        adc_frame_unaligned_s;
-  wire [ 7:0] adc_realign_cnt_s;
-  wire        adc_realign_clr_s;
 
   wire        up_rstn;
   wire        up_clk;
@@ -306,10 +302,6 @@ module axi_ada4355 #(
     .aresetn(up_rstn),
     .adc_pn_err(adc_pn_err_s),
     .enable_error(enable_error_s),
-    .adc_shift_cnt(adc_shift_cnt_s),
-    .adc_frame_unaligned(adc_frame_unaligned_s),
-    .adc_realign_cnt(adc_realign_cnt_s),
-    .adc_realign_clr(adc_realign_clr_s),
     .sync_n(sync_n),
     .clkgen_rst(clkgen_rst_s));
 
@@ -350,10 +342,6 @@ module axi_ada4355 #(
     .up_rack(up_rack_s[3]),
     .clk_div(adc_clk_s),
     .enable_error_sync(enable_error_s),
-    .adc_shift_cnt(adc_shift_cnt_s),
-    .adc_frame_unaligned(adc_frame_unaligned_s),
-    .adc_realign_cnt(adc_realign_cnt_s),
-    .adc_realign_clr(adc_realign_clr_s),
     .adc_rst(adc_rst_s));
 
   // up bus interface

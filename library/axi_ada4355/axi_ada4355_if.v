@@ -78,13 +78,7 @@ module axi_ada4355_if #(
   output [15:0]                      adc_data,
   output                             adc_valid,
   output                             adc_pn_err,
-  input  [ 2:0]                      enable_error,
-
-  // frame-alignment state, to correlate with the per-boot BUFR draw
-  output [ 2:0]                      adc_shift_cnt,
-  output                             adc_frame_unaligned,
-  output [ 7:0]                      adc_realign_cnt,
-  input                              adc_realign_clr
+  input  [ 2:0]                      enable_error
 );
 
   // Use always DDR mode for SERDES, useful for SDR mode to adjust capture
@@ -149,9 +143,6 @@ module axi_ada4355_if #(
   reg        data_err_lane_0_r;
   reg        data_err_lane_1_r;
   reg [15:0] test_pattern;
-  reg        frame_aligned = 1'b0;
-  reg        frame_aligned_d = 1'b0;
-  reg [ 7:0] realign_cnt = 8'd0;
 
   /*
    * Two sources restart the receive path: sync_n from the pin, and clkgen_rst
@@ -442,21 +433,6 @@ module axi_ada4355_if #(
     adc_data_shifted <= (({serdes_data_d,serdes_data} >> (shift_cnt)) >> (shift_cnt));
     serdes_valid_d <= serdes_valid;
   end
-
-  // Every loss of lock re-walks shift_cnt and moves the data by whole bits.
-  always @(posedge adc_clk_div) begin
-    frame_aligned <= (state == INIT) && (frame_shifted == pattern_value);
-    frame_aligned_d <= frame_aligned;
-    if (adc_realign_clr) begin
-      realign_cnt <= 8'd0;
-    end else if (frame_aligned_d && !frame_aligned && (realign_cnt != 8'hff)) begin
-      realign_cnt <= realign_cnt + 1'b1;
-    end
-  end
-
-  assign adc_shift_cnt = shift_cnt;
-  assign adc_frame_unaligned = ~frame_aligned;
-  assign adc_realign_cnt = realign_cnt;
 
   assign adc_valid = !adc_rst;
   assign adc_data = adc_data_shifted;
