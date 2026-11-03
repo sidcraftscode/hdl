@@ -36,6 +36,8 @@
 `timescale 1ns/100ps
 
 module system_top #(
+  // Unused here (the TDD split is in the block design), but adi_project sets
+  // every build parameter as a top-level generic, and this gives it a target.
   parameter TDD_SUPPORT = 1
 ) (
 
@@ -78,6 +80,7 @@ module system_top #(
 
   output        spdif,
 
+  // FMC I2C bus: the three MAX7320 expanders (gain, filter, current divider)
   inout         iic_scl,
   inout         iic_sda,
   inout  [ 1:0] iic_mux_scl,
@@ -127,12 +130,12 @@ module system_top #(
   input         frame_3_p,
   input         frame_3_n,
 
-  // ADA4356 SPI interface (shared bus)
+  // SPI interface (PS SPI0, shared by the four ADA4356 and the AD9517-4)
   output        sclk,
   output        mosi,
   input         miso,
 
-  // ADA4356 SPI chip selects (active low)
+  // SPI chip selects on GPIO (active low): DUT A..D and the AD9517-4
   inout         csb_duta,
   inout         csb_dutb,
   inout         csb_dutc,
@@ -167,7 +170,7 @@ module system_top #(
   wire        iic_mux_sda_t_s;
 
   // GPIO mapping:
-  // [31: 0] - gpio_bd (directly active on Zedboard LEDs/switches/buttons)
+  // [31: 0] - gpio_bd (Zedboard LEDs, switches, buttons)
   // [32]    - csb_duta
   // [33]    - csb_dutb
   // [34]    - csb_dutc

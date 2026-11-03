@@ -14,7 +14,7 @@ if {$TDD_SUPPORT} {
   source $ad_hdl_dir/library/axi_tdd/scripts/axi_tdd.tcl
 }
 
-# ada4355 interfaces for 4 instances
+# ADA4356 interfaces for 4 axi_ada4355 instances
 
 # Instance 0
 create_bd_port -dir I dco_0_p
@@ -254,7 +254,10 @@ if {$TDD_SUPPORT} {
 
   # Channels 1-4 gate the four DMA captures. With SYNC_TRANSFER_START=1 each
   # DMA holds off until its sync input pulses high, so software can arm all
-  # four DMAs then let TDD fire them simultaneously.
+  # four DMAs then let TDD fire them together. The TDD runs on ADC 0's clock and
+  # axi_dmac samples sync on fifo_wr_clk without a synchronizer, so DMAs 1-3
+  # start on an asynchronous crossing and can land a sample apart from DMA 0;
+  # the residual skew is measured and removed in software.
   ad_connect axi_tdd_0/tdd_channel_1 axi_ada4355_dma_0/sync
   ad_connect axi_tdd_0/tdd_channel_2 axi_ada4355_dma_1/sync
   ad_connect axi_tdd_0/tdd_channel_3 axi_ada4355_dma_2/sync
@@ -303,7 +306,7 @@ ad_mem_hp1_interconnect $sys_dma_clk axi_ada4355_dma_3/m_dest_axi
 # port is GND. Claiming 14 or 15 reroutes a DMA completion IRQ to the i2c or
 # HDMI driver and that channel never finishes a transfer.
 #
-# ps-N reaches the device tree as GIC SPI (N + 44).
+# ps-N reaches the device tree as GIC SPI (N + 44) for N >= 8, (N + 29) below.
 ad_cpu_interrupt ps-9  mb-9  axi_ada4355_dma_0/irq
 ad_cpu_interrupt ps-10 mb-10 axi_ada4355_dma_1/irq
 ad_cpu_interrupt ps-12 mb-12 axi_ada4355_dma_2/irq

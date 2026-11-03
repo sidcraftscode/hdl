@@ -8,7 +8,7 @@
 set_property -dict {PACKAGE_PIN L18 IOSTANDARD LVCMOS25} [get_ports sclk];         ## H4  FMC_CLK0_M2C_P  IO_L12P_T1_MRCC_34         SCLK_FMC
 set_property -dict {PACKAGE_PIN P17 IOSTANDARD LVCMOS25} [get_ports mosi];         ## H7  FMC_LA02_P      IO_L20P_T3_34              SDI_FMC
 set_property -dict {PACKAGE_PIN P18 IOSTANDARD LVCMOS25} [get_ports miso];         ## H8  FMC_LA02_N      IO_L20N_T3_34              SDO_FMC
-set_property -dict {PACKAGE_PIN L21 IOSTANDARD LVCMOS25} [get_ports csb_ad9510];   ## C10 FMC_LA06_P      IO_L10P_T1_34              CSB_AD9510_FMC
+set_property -dict {PACKAGE_PIN L21 IOSTANDARD LVCMOS25} [get_ports csb_ad9510];   ## C10 FMC_LA06_P      IO_L10P_T1_34              CSB_AD951X_FMC (AD9517-4)
 
 set_property -dict {PACKAGE_PIN J16 IOSTANDARD LVCMOS25} [get_ports csb_dutd];     ## H19 FMC_LA15_P      IO_L2P_T0_34               CSB_DUTD_FMC
 set_property -dict {PACKAGE_PIN J17 IOSTANDARD LVCMOS25} [get_ports csb_duta];     ## H20 FMC_LA15_N      IO_L2N_T0_34               CSB_DUTA_FMC
@@ -26,8 +26,6 @@ set_property -dict {PACKAGE_PIN A16 IOSTANDARD LVCMOS25} [get_ports apd_supp_en]
 
 set_property -dict {PACKAGE_PIN M21 IOSTANDARD LVCMOS25} [get_ports trig_fmc_in];  ## H10 FMC_LA04_P      IO_L15P_T2_DQS_34          TRIG_FMC_IN
 set_property -dict {PACKAGE_PIN M22 IOSTANDARD LVCMOS25} [get_ports trig_fmc_out]; ## H11 FMC_LA04_N      IO_L15N_T2_DQS_34          TRIG_FMC_OUT
-
-#set_property -dict {PACKAGE_PIN C15 IOSTANDARD LVCMOS25} [get_ports int_max7329];  ## H34 FMC_LA30_P      IO_L7P_T1_AD2P_35          INT_MAX7329
 
 # ADA4356 Instance 0 (DUT A) - LVDS Data Interface (bank 34)
 
@@ -79,7 +77,10 @@ create_clock -period 2.000 -name dco_1_clk [get_ports dco_1_p]
 create_clock -period 2.000 -name dco_2_clk [get_ports dco_2_p]
 create_clock -period 2.000 -name dco_3_clk [get_ports dco_3_p]
 
-# Clock groups to define asynchronous clock domains
+# One command per DCO, not one command with four groups: each DCO domain must be
+# asynchronous to every other clock, clk_fpga_* included, because those
+# crossings go through the IP CDC logic. This also leaves the axi_tdd (ADC 0
+# clock) -> axi_ada4355_dma_1..3/sync crossings untimed; see quad_ada4356_fmc_bd.tcl.
 set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks dco_0_clk]
 set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks dco_1_clk]
 set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks dco_2_clk]

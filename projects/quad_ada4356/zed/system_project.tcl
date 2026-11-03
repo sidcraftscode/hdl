@@ -10,7 +10,7 @@ source $ad_hdl_dir/projects/scripts/adi_board.tcl
 # Parameter description:
 #   TDD_SUPPORT : capture mode
 #      1 - axi_tdd gates the four DMAs, triggered/one-shot capture (default)
-#      0 - DMAs free-run, continuous capture, no axi_tdd instance
+#      0 - no axi_tdd; each DMA transfer starts when submitted (ungated, not cyclic)
 #
 #    e.g.
 #      make TDD_SUPPORT=0
